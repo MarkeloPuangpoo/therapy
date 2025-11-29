@@ -1,7 +1,7 @@
 workflows:
-  my-workflow:
-    name: My SOS App Build
-    instance_type: mac_mini_m2 # ใช้เครื่อง Mac ของ Codemagic ในการรัน
+  my-sideload-workflow:
+    name: My SOS App (Sideload Version)
+    instance_type: mac_mini_m2
     max_build_duration: 60
     environment:
       flutter: stable
@@ -16,13 +16,15 @@ workflows:
         script: |
           flutter build apk --release
 
-      - name: Build iOS (Code Signing required for IPA)
+      - name: Build iOS IPA (For Sideloadly)
         script: |
-          # หมายเหตุ: บรรทัดนี้จะสร้างแค่ตัวแอป แต่ยังไม่ได้ลงลายเซ็น (Unsigned)
-          # ถ้าจะเอาไปลง iPhone ต้องตั้งค่า Certificate ก่อน
           flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -r release_app.ipa Payload
 
     artifacts:
-      - build/**/outputs/**/*.apk # เก็บไฟล์ Android
-      - build/**/outputs/**/*.app # เก็บไฟล์ iOS (แบบยังไม่สมบูรณ์)
+      - build/**/outputs/**/*.apk
+      - build/ios/iphoneos/*.ipa
       - flutter_drive.log
