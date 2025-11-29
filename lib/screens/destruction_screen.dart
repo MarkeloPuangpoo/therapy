@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:therapy/logic/destruction_provider.dart';
 import 'package:therapy/widgets/particle_fire.dart';
-import 'package:vibration/vibration.dart';
+import 'package:flutter/services.dart';
 
 class DestructionScreen extends StatefulWidget {
   const DestructionScreen({super.key});
@@ -26,14 +26,20 @@ class _DestructionScreenState extends State<DestructionScreen>
 
     // Haptic Feedback
     try {
-      if (await Vibration.hasVibrator() ?? false) {
-        if (provider.mode == DestructionMode.shred) {
-          Vibration.vibrate(pattern: [0, 200, 50, 200, 50, 200]);
-        } else if (provider.mode == DestructionMode.fire) {
-          Vibration.vibrate(duration: 2000, amplitude: 128); // Rumble
-        } else {
-          Vibration.vibrate(duration: 500);
+      if (provider.mode == DestructionMode.shred) {
+        // Simulate shredding with multiple heavy impacts
+        for (int i = 0; i < 5; i++) {
+          await HapticFeedback.heavyImpact();
+          await Future.delayed(const Duration(milliseconds: 100));
         }
+      } else if (provider.mode == DestructionMode.fire) {
+        // Simulate fire rumble
+        for (int i = 0; i < 10; i++) {
+          await HapticFeedback.mediumImpact();
+          await Future.delayed(const Duration(milliseconds: 150));
+        }
+      } else {
+        await HapticFeedback.mediumImpact();
       }
     } catch (e) {
       debugPrint('Vibration error: $e');
